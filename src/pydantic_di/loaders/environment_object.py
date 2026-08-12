@@ -40,16 +40,4 @@ class ObjectLoaderEnvironment(ObjectLoaderBase[T]):
             self.env_prefix,
         )
 
-        if self.discriminator_key:
-            if not tree.get(self.discriminator_key):
-                if self.default_discriminator_value is not None:
-                    tree[self.discriminator_key] = str(self.default_discriminator_value)
-                else:
-                    raise ValueError(
-                        f"No discriminator choice provided for `{self.discriminator_key}`, loading"
-                        f" please ensure you have configured your environmnt correctly."
-                        f" `{self.env_prefix}_{self.discriminator_key.upper()}` should be"
-                        f" one of the following: {'|'.join(self.discriminator_choices)}"
-                    )
-
-        return tree
+        return self.prepare_object_data(tree)

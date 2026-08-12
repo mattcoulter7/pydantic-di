@@ -6,9 +6,19 @@ from pydantic import Discriminator
 
 from .environment import LoaderEnvironment
 from .environment_object import ObjectLoaderEnvironment
+from .ini_object import ObjectLoaderIni
+from .json_object import ObjectLoaderJson
 from .template import LoaderTemplate
+from .toml_object import ObjectLoaderToml
+from .yaml_object import ObjectLoaderYaml
 
 Loader = Annotated[
-    ObjectLoaderEnvironment | LoaderEnvironment | LoaderTemplate,
+    ObjectLoaderEnvironment
+    | ObjectLoaderJson
+    | ObjectLoaderYaml
+    | ObjectLoaderToml
+    | ObjectLoaderIni
+    | LoaderEnvironment
+    | LoaderTemplate,
     Discriminator("source"),
 ]

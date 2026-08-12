@@ -21,6 +21,7 @@ dependencies = [
   "generic-preserver>=0.1.4,<0.2",
   "pydantic-settings>=2.10.1,<3",
   "pydantic>=2.11.7,<3",
+  "pyyaml>=6.0.0,<7",
 ]
 description = ""
 name = "pydantic-di"
