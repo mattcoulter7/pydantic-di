@@ -22,6 +22,7 @@ should use `pydantic-di` and `pydantic_di`.
 ## Features
 
 - Load Pydantic models from environment variables
+- Load Pydantic models from local JSON, YAML, TOML, and INI files
 - Load primitive values from environment variables
 - Support discriminated unions
 - Support attrs classes by converting them to Pydantic-compatible models
@@ -140,6 +141,171 @@ PORT=8080
 ```
 
 The value is validated and cast using Pydantic.
+
+## Loading objects from local files
+
+Use the file-backed object loaders when structured configuration already lives in a local file.
+
+```python
+from pydantic import BaseModel
+
+from pydantic_di.loaders import ObjectLoaderJson
+
+
+class Credentials(BaseModel):
+    username: str
+    password: str
+
+
+class ServiceConfig(BaseModel):
+    host: str
+    port: int
+    credentials: Credentials
+
+
+config = ObjectLoaderJson[ServiceConfig](
+    path="config.json",
+).load()
+```
+
+Each file loader parses its source into a dictionary, then uses the same Pydantic validation pipeline as the environment object loader.
+
+Supported object file loaders:
+
+| Loader | Source value | Format |
+| --- | --- | --- |
+| `ObjectLoaderJson` | `JSON_OBJECT` | JSON |
+| `ObjectLoaderYaml` | `YAML_OBJECT` | YAML, parsed with `yaml.safe_load` |
+| `ObjectLoaderToml` | `TOML_OBJECT` | TOML, parsed with stdlib `tomllib` |
+| `ObjectLoaderIni` | `INI_OBJECT` | INI, parsed with `ConfigParser` |
+
+The `path` field is a `Path`, but strings are accepted and converted by Pydantic.
+
+```python
+from pathlib import Path
+
+ObjectLoaderJson[ServiceConfig](path="config.json")
+ObjectLoaderJson[ServiceConfig](path=Path("config.json"))
+```
+
+### JSON files
+
+```json
+{
+  "host": "localhost",
+  "port": 5432,
+  "credentials": {
+    "username": "admin",
+    "password": "secret"
+  }
+}
+```
+
+```python
+from pydantic_di.loaders import ObjectLoaderJson
+
+config = ObjectLoaderJson[ServiceConfig](
+    path="config.json",
+).load()
+```
+
+### YAML files
+
+```yaml
+host: localhost
+port: 5432
+credentials:
+  username: admin
+  password: secret
+```
+
+```python
+from pydantic_di.loaders import ObjectLoaderYaml
+
+config = ObjectLoaderYaml[ServiceConfig](
+    path="config.yaml",
+).load()
+```
+
+YAML is parsed with `yaml.safe_load`.
+
+### TOML files
+
+```toml
+host = "localhost"
+port = 5432
+
+[credentials]
+username = "admin"
+password = "secret"
+```
+
+```python
+from pydantic_di.loaders import ObjectLoaderToml
+
+config = ObjectLoaderToml[ServiceConfig](
+    path="config.toml",
+).load()
+```
+
+### INI files
+
+```ini
+[DEFAULT]
+host = localhost
+port = 5432
+
+[credentials]
+username = admin
+password = secret
+```
+
+```python
+from pydantic_di.loaders import ObjectLoaderIni
+
+config = ObjectLoaderIni[ServiceConfig](
+    path="config.ini",
+).load()
+```
+
+INI values are read as strings first, then Pydantic casts them to the target field types.
+
+### File shape
+
+File-backed object loaders expect nested objects to be represented as nested file data.
+
+```yaml
+credentials:
+  username: admin
+  password: secret
+```
+
+Environment-style flattened nested keys are not expanded for file loaders.
+
+```yaml
+credentials_username: admin
+credentials_password: secret
+```
+
+Field names that contain underscores still work normally.
+
+```python
+class AppConfig(BaseModel):
+    api_key: str
+```
+
+```yaml
+api_key: secret
+```
+
+The field-alignment helper can also accept a nested representation for underscore field names.
+
+```yaml
+api:
+  key: secret
+```
+
+Both forms can resolve to `api_key`, but nested models should use real nested objects.
 
 ## Loader defaults
 
@@ -494,6 +660,56 @@ This becomes:
     "num": 42,
 }
 ```
+
+## Discriminated unions from files
+
+File-backed object loaders support the same discriminated union types.
+
+```python
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, Discriminator
+from pydantic_di.loaders import ObjectLoaderYaml
+
+
+class YamlRoleStore(BaseModel):
+    type: Literal["YAML"] = "YAML"
+    path: str
+
+
+class NullRoleStore(BaseModel):
+    type: Literal["NULL"] = "NULL"
+
+
+RoleStore = Annotated[
+    YamlRoleStore | NullRoleStore,
+    Discriminator("type"),
+]
+
+role_store = ObjectLoaderYaml[RoleStore](
+    path="role-store.yaml",
+).load()
+```
+
+```yaml
+type: YAML
+path: roles.yaml
+```
+
+If the file does not contain the discriminator field, provide `default_discriminator_value`.
+
+```python
+role_store = ObjectLoaderYaml[RoleStore](
+    path="role-store.yaml",
+    default_discriminator_value="YAML",
+).load()
+```
+
+```yaml
+path: roles.yaml
+```
+
+The loader injects the discriminator value before validation.
 
 ## attrs support
 

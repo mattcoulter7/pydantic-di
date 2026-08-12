@@ -21,12 +21,13 @@ dependencies = [
   "generic-preserver>=0.1.4,<0.2",
   "pydantic-settings>=2.10.1,<3",
   "pydantic>=2.11.7,<3",
+  "pyyaml>=6.0.0,<7",
 ]
 description = ""
 name = "pydantic-di"
 readme = "README.md"
 requires-python = ">=3.12, <4"
-version = "0.2.4"
+version = "0.2.5"
 
 [project.optional-dependencies]
 fastapi = ["fastapi>= 0.78.0"]

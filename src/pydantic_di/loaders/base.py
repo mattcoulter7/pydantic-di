@@ -106,6 +106,22 @@ class ObjectLoaderBase(LoaderBase[T], ABC):
 
         return deep_merge(deepcopy(self.default_values), data)
 
+    def prepare_object_data(
+        self,
+        data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Validate and prepare raw object data before model parsing."""
+        if self.discriminator_key and not data.get(self.discriminator_key):
+            if self.default_discriminator_value is not None:
+                data[self.discriminator_key] = str(self.default_discriminator_value)
+            else:
+                raise ValueError(
+                    f"No discriminator choice provided for `{self.discriminator_key}`. "
+                    f"Expected one of: {'|'.join(self.discriminator_choices)}"
+                )
+
+        return data
+
     @model_validator(mode="after")
     def validate_type(self):
         """Ensure that the type is a BaseModel or a Union of BaseModels."""
