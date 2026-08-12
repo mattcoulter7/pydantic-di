@@ -42,7 +42,7 @@ class ObjectLoaderEnvironment(ObjectLoaderBase[T]):
 
         if self.discriminator_key:
             if not tree.get(self.discriminator_key):
-                if self.default_discriminator_value:
+                if self.default_discriminator_value is not None:
                     tree[self.discriminator_key] = str(self.default_discriminator_value)
                 else:
                     raise ValueError(

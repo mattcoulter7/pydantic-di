@@ -4,6 +4,7 @@ import inspect
 import os
 import re
 from collections.abc import Iterator
+from copy import deepcopy
 from typing import get_args
 
 
@@ -97,6 +98,22 @@ def extract_env_tree(env: dict[str, str], prefix: str) -> dict:
             insert_recursive(result, keys, value)
 
     return result
+
+
+def deep_merge(
+    defaults: dict[str, object],
+    configured: dict[str, object],
+) -> dict[str, object]:
+    """Recursively merge configured values over defaults."""
+    merged = deepcopy(defaults)
+
+    for key, value in configured.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = deep_merge(merged[key], value)
+        else:
+            merged[key] = deepcopy(value)
+
+    return merged
 
 
 def walk_types_args(t_base: type):
