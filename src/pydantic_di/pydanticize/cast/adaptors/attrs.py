@@ -65,7 +65,7 @@ class AttrsPlugin(BaseTypePlugin):
 
     @override
     def upgrade(self, _type: type) -> type[BaseModel]:  # override
-        from ab_core.dependency.pydanticize import is_supported_by_pydantic, pydanticize_type
+        from pydantic_di.pydanticize import is_supported_by_pydantic, pydanticize_type
 
         name = _type.__name__
 

@@ -41,7 +41,7 @@ class UnsetStripPlugin(BaseTypePlugin):
           Union[Unset]             -> Any   (degenerate case)
 
         """
-        from ab_core.dependency.pydanticize.cast.helpers import pydanticize_type
+        from pydantic_di.pydanticize.cast.helpers import pydanticize_type
 
         args = tuple(a for a in get_args(_type) if not _is_unset(a))
         if not args:
