@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 from typing import Annotated, Literal
 from unittest.mock import patch
 
@@ -22,6 +23,30 @@ class DummyStoreB(BaseModel):
 
 
 LoaderUnion = Annotated[DummyStoreA | DummyStoreB, Discriminator("type")]
+
+
+class Permission(Enum):
+    ACCESS_READ = "access.read"
+
+
+class RoleName(Enum):
+    ADMIN = "admin"
+
+
+class YamlRoleStore[PermissionType: Enum, RoleNameType: Enum](BaseModel):
+    type: Literal["YAML"] = "YAML"
+    permission: PermissionType
+    role: RoleNameType
+
+
+class NullRoleStore[PermissionType: Enum, RoleNameType: Enum](BaseModel):
+    type: Literal["NULL"] = "NULL"
+
+
+type RoleStore[PermissionType: Enum, RoleNameType: Enum] = Annotated[
+    YamlRoleStore[PermissionType, RoleNameType] | NullRoleStore[PermissionType, RoleNameType],
+    Discriminator("type"),
+]
 
 
 @pytest.mark.parametrize(
@@ -102,6 +127,52 @@ def test_loader_supports_pep695_type_alias():
         result = loader.load()
 
     assert result == DummyStoreA()
+
+
+def test_parameterised_pep695_alias_loads_generic_discriminated_union():
+    loader = ObjectLoaderEnvironment[RoleStore[Permission, RoleName]](
+        env_prefix="ROLE_STORE",
+        default_discriminator_value="YAML",
+    )
+
+    with patch.dict(
+        os.environ,
+        {
+            "ROLE_STORE_YAML_PERMISSION": "access.read",
+            "ROLE_STORE_YAML_ROLE": "admin",
+        },
+        clear=False,
+    ):
+        result = loader.load()
+
+    assert isinstance(result, YamlRoleStore)
+    assert result.permission is Permission.ACCESS_READ
+    assert result.role is RoleName.ADMIN
+
+
+def test_parameterised_pep695_alias_supports_explicit_discriminator():
+    loader = ObjectLoaderEnvironment[RoleStore[Permission, RoleName]](
+        env_prefix="ROLE_STORE",
+    )
+
+    with patch.dict(
+        os.environ,
+        {
+            "ROLE_STORE_TYPE": "NULL",
+        },
+        clear=False,
+    ):
+        result = loader.load()
+
+    assert isinstance(result, NullRoleStore)
+
+
+def test_parameterised_pep695_alias_uses_alias_name_for_env_prefix():
+    loader = ObjectLoaderEnvironment[RoleStore[Permission, RoleName]](
+        default_discriminator_value="YAML",
+    )
+
+    assert loader.env_prefix == "ROLE_STORE"
 
 
 class Credentials(BaseModel):
