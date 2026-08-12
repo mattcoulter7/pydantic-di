@@ -26,7 +26,7 @@ description = ""
 name = "pydantic-di"
 readme = "README.md"
 requires-python = ">=3.12, <4"
-version = "0.2.2"
+version = "0.2.3"
 
 [project.optional-dependencies]
 fastapi = ["fastapi>= 0.78.0"]
