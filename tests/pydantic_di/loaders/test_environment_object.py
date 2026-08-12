@@ -118,3 +118,29 @@ def test_loader_object_default_values_env_wins_after_alignment():
             password="secret",
         ),
     )
+
+
+def test_loader_object_default_values_used_when_no_env_data():
+    loader = ObjectLoaderEnvironment[ServiceConfig](
+        env_prefix="MY_CONFIG",
+        default_values={
+            "api_key": "default",
+            "port": 5432,
+            "credentials": {
+                "username": "admin",
+                "password": "secret",
+            },
+        },
+    )
+
+    with patch.dict(os.environ, {}, clear=True):
+        result = loader.load()
+
+    assert result == ServiceConfig(
+        api_key="default",
+        port=5432,
+        credentials=Credentials(
+            username="admin",
+            password="secret",
+        ),
+    )
