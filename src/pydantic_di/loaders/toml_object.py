@@ -5,11 +5,10 @@ from typing import Any, Literal, override
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import T
 from .file_object import ObjectLoaderFileBase
 
 
-class ObjectLoaderToml(ObjectLoaderFileBase[T]):
+class ObjectLoaderToml[T](ObjectLoaderFileBase[T]):
     """Load a structured object from a local TOML file."""
 
     source: Literal[LoaderSource.TOML_OBJECT] = LoaderSource.TOML_OBJECT

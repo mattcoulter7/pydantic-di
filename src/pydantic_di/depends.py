@@ -26,7 +26,6 @@ Both share a single private implementation, so maintenance cost is low.
 """
 
 from collections.abc import Awaitable
-from typing import TypeVar
 
 from .loaders.base import LoaderBase
 from .singleton import SingletonRegistry
@@ -49,8 +48,7 @@ try:
 except ModuleNotFoundError:  # running without FastAPI
     _FastapiDepends = NullDepends  # type: ignore[assignment,misc]
 
-T = TypeVar("T")
-Ret = T | Awaitable[T]
+type Ret[T] = T | Awaitable[T]
 
 # --------------------------------------------------------------------- #
 # Core implementation (sync; never awaits)                              #

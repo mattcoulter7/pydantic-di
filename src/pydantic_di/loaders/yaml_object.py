@@ -6,11 +6,10 @@ import yaml
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import T
 from .file_object import ObjectLoaderFileBase
 
 
-class ObjectLoaderYaml(ObjectLoaderFileBase[T]):
+class ObjectLoaderYaml[T](ObjectLoaderFileBase[T]):
     """Load a structured object from a local YAML file."""
 
     source: Literal[LoaderSource.YAML_OBJECT] = LoaderSource.YAML_OBJECT
