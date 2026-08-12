@@ -6,12 +6,9 @@ from contextlib import AsyncExitStack, ExitStack, asynccontextmanager, contextma
 from functools import wraps
 from inspect import isawaitable
 from types import AsyncGeneratorType, GeneratorType
-from typing import Annotated, Any, ParamSpec, TypeVar, get_args, get_origin, overload
+from typing import Annotated, Any, get_args, get_origin, overload
 
 from .depends import Depends
-
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 # ---------- Wrap a single provider as a *sync* context manager ----------
@@ -187,7 +184,7 @@ def inject[**P, R](__fn: Callable[P, R]) -> Callable[P, R]: ...
 def inject[**P, R]() -> Callable[[Callable[P, R]], Callable[P, R]]: ...
 
 
-def inject(target: Callable[..., Any] | type | None = None):
+def inject[**P, R](target: Callable[..., Any] | type | None = None):
     """Decorate a function or class to resolve Annotated Depends values."""
 
     def _wrap_fn(fn: Callable[P, R]) -> Callable[P, R]:

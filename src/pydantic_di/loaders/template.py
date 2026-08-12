@@ -4,10 +4,10 @@ from typing import Any, Literal, override
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import LoaderBase, T
+from .base import LoaderBase
 
 
-class LoaderTemplate(LoaderBase[T]):
+class LoaderTemplate[T](LoaderBase[T]):
     """Example loader skeleton for custom implementations.
 
     Replace `load_raw` with your data source retrieval logic.

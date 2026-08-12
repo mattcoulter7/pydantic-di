@@ -1,12 +1,10 @@
 """Singleton registry used for persisted dependency instances."""
 
-from typing import Any, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
 from .types import LoadTarget
-
-T = TypeVar("T", bound=BaseModel)
 
 
 class SingletonRegistryMeta(type):
@@ -14,7 +12,7 @@ class SingletonRegistryMeta(type):
 
     _instances: dict[tuple[Any, Any], BaseModel] = {}
 
-    def __call__(cls, loader: LoadTarget[T], key: Any) -> T:
+    def __call__[T: BaseModel](cls, loader: LoadTarget[T], key: Any) -> T:
         """Return a cached instance for `key`, creating it if needed."""
         if key not in cls._instances:
             cls._instances[key] = loader()

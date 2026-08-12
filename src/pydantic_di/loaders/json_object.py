@@ -5,11 +5,10 @@ from typing import Any, Literal, override
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import T
 from .file_object import ObjectLoaderFileBase
 
 
-class ObjectLoaderJson(ObjectLoaderFileBase[T]):
+class ObjectLoaderJson[T](ObjectLoaderFileBase[T]):
     """Load a structured object from a local JSON file."""
 
     source: Literal[LoaderSource.JSON_OBJECT] = LoaderSource.JSON_OBJECT

@@ -3,10 +3,7 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from functools import cached_property
-from typing import (
-    Any,
-    TypeVar,
-)
+from typing import Any
 
 from generic_preserver.wrapper import generic_preserver
 from pydantic import BaseModel, Discriminator, Field, TypeAdapter, model_validator
@@ -14,8 +11,6 @@ from pydantic_core.core_schema import CoreSchema
 
 from pydantic_di.pydanticize import cached_type_adapter, pydanticize_data, pydanticize_type
 from pydantic_di.utils import deep_merge, extract_target_types, type_name_intersection
-
-T = TypeVar("T")
 
 
 @generic_preserver
@@ -88,7 +83,7 @@ class LoaderBase[T](BaseModel, ABC):
             return False
 
 
-class ObjectLoaderBase(LoaderBase[T], ABC):
+class ObjectLoaderBase[T](LoaderBase[T], ABC):
     """Base class for loaders that handle Pydantic BaseModel objects."""
 
     default_values: dict[str, Any] = Field(default_factory=dict)

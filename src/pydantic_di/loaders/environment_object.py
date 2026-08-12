@@ -8,10 +8,10 @@ from pydantic import model_validator
 from pydantic_di.schema.loader_type import LoaderSource
 from pydantic_di.utils import extract_env_tree, to_env_prefix
 
-from .base import ObjectLoaderBase, T
+from .base import ObjectLoaderBase
 
 
-class ObjectLoaderEnvironment(ObjectLoaderBase[T]):
+class ObjectLoaderEnvironment[T](ObjectLoaderBase[T]):
     """Load structured objects from environment variables.
 
     Data is collected using a configurable prefix and reshaped to match
