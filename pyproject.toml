@@ -8,15 +8,14 @@ dev = [
   "httpx>=0.28.1,<0.29",
   "isort>=6.0.1,<7",
   "pre-commit>=4.2.0,<5",
-  "pytest-asyncio>=1.0.0,<2",
-  "pytest-cov>=6.2.1,<7",
+  "pytest-asyncio>=1.4.0,<2",
+  "pytest-cov>=7.1.0,<8",
   "pytest>=8.4.1,<9",
-  "ruff>=0.12.3,<0.13",
-  "tox>=4.27.0,<5"
+  "ruff>=0.12.3,<0.17"
 ]
 
 [project]
-authors = [{email = "53892067+mattcoulter7@users.noreply.github.com", name = "Matthew Coulter"}]
+authors = [{email = "mattcoul7@gmail.com", name = "Matthew Coulter"}]
 dependencies = [
   "deepdiff>=8.5.0,<9",
   "generic-preserver>=0.1.4,<0.2",
@@ -24,7 +23,7 @@ dependencies = [
   "pydantic>=2.11.7,<3",
 ]
 description = ""
-name = "ab-dependency"
+name = "pydantic-di"
 readme = "README.md"
 requires-python = ">=3.12, <4"
 version = "0.2.2"
@@ -39,13 +38,10 @@ attrs-plugin = [
 ]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/ab_core"]
+include = ["src/pydantic_di"]
 
 [tool.hatch.build.targets.wheel]
-include = ["src/ab_core"]
-
-[tool.hatch.build.targets.wheel.sources]
-"src/ab_core" = "ab_core"
+packages = ["src/pydantic_di"]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "session"

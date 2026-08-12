@@ -1,4 +1,4 @@
-"""FastAPI integration-tests for ab_core.dependency.inject
+"""FastAPI integration-tests for pydantic_di.inject
 — no module-level global state, endpoints use FastAPI’s Depends.
 """
 
@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
 # your DI helpers stay available for *internal* deps
-from ab_core.dependency import Depends, inject, sentinel
+from pydantic_di import Depends, inject, sentinel
 
 
 # ------------------------------------------------------------------ #

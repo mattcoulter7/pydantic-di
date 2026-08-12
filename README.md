@@ -1,8 +1,8 @@
-# ab-dependency
+# pydantic-di
 
 A lightweight dependency loading and injection package for Python.
 
-`ab-dependency` provides a small dependency system for loading objects from environment variables, Python callables, Pydantic models, attrs classes, and custom loaders. It is designed to feel familiar if you have used FastAPI dependencies, while also working outside FastAPI.
+`pydantic-di` provides a small dependency system for loading objects from environment variables, Python callables, Pydantic models, attrs classes, and custom loaders. It is designed to feel familiar if you have used FastAPI dependencies, while also working outside FastAPI.
 
 ## Migration from auth-broker
 
@@ -42,13 +42,13 @@ should use `pydantic-di` and `pydantic_di`.
 ## Installation
 
 ```bash
-pip install ab-dependency
+pip install pydantic-di
 ```
 
 Or with `uv`:
 
 ```bash
-uv add ab-dependency
+uv add pydantic-di
 ```
 
 ## Basic usage
@@ -56,7 +56,7 @@ uv add ab-dependency
 ```python
 from pydantic import BaseModel
 
-from ab_core.dependency import Load
+from pydantic_di import Load
 
 
 class AppConfig(BaseModel):
@@ -130,7 +130,7 @@ APP_CONFIG_DATABASE_PORT=5432
 Use `LoaderEnvironment` when loading a single primitive value from a specific environment variable.
 
 ```python
-from ab_core.dependency.loaders import LoaderEnvironment
+from pydantic_di.loaders import LoaderEnvironment
 
 port = LoaderEnvironment[int](key="PORT").load()
 ```
@@ -147,7 +147,7 @@ The value is validated and cast using Pydantic.
 
 ```python
 from pydantic import BaseModel
-from ab_core.dependency import Load
+from pydantic_di import Load
 
 
 class Client(BaseModel):
@@ -179,7 +179,7 @@ from typing import Annotated
 
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 class Settings(BaseModel):
@@ -201,7 +201,7 @@ from typing import Annotated
 
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 class Database(BaseModel):
@@ -224,7 +224,7 @@ handler(Database(url="postgresql://"))
 ```python
 from typing import Annotated
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 async def make_token() -> str:
@@ -243,7 +243,7 @@ Generator dependencies are entered before the function runs and cleaned up after
 ```python
 from typing import Annotated
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 def resource():
@@ -278,7 +278,7 @@ from typing import Annotated
 
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 class Settings(BaseModel):
@@ -300,7 +300,7 @@ from typing import Annotated
 
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 class Settings(BaseModel):
@@ -325,7 +325,7 @@ from typing import Annotated
 from fastapi import Depends as FDepends, FastAPI
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject
+from pydantic_di import Depends, inject
 
 
 class SomeDependency(BaseModel):
@@ -361,7 +361,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Discriminator
 
-from ab_core.dependency import Load
+from pydantic_di import Load
 
 
 class FileStore(BaseModel):
@@ -419,8 +419,8 @@ attrs classes can be loaded by converting them into Pydantic-compatible models.
 ```python
 import attrs
 
-from ab_core.dependency import Load
-from ab_core.dependency.pydanticize import pydanticize_type
+from pydantic_di import Load
+from pydantic_di.pydanticize import pydanticize_type
 
 
 @attrs.define
@@ -442,7 +442,7 @@ Simple lists can be supplied as JSON strings.
 ```python
 from pydantic import BaseModel
 
-from ab_core.dependency import Load
+from pydantic_di import Load
 
 
 class Config(BaseModel):
@@ -531,7 +531,7 @@ Create a custom loader by subclassing `LoaderBase`.
 ```python
 from typing import Any
 
-from ab_core.dependency.loaders.base import LoaderBase
+from pydantic_di.loaders.base import LoaderBase
 
 
 class MyLoader(LoaderBase[str]):
@@ -551,7 +551,7 @@ value = loader.load()
 ## Public API
 
 ```python
-from ab_core.dependency import (
+from pydantic_di import (
     Depends,
     Load,
     inject,

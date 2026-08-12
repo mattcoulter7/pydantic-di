@@ -4,7 +4,7 @@ import attrs
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from ab_core.dependency.pydanticize import pydanticize_type
+from pydantic_di.pydanticize import pydanticize_type
 
 
 def test_simple_required_and_defaults():

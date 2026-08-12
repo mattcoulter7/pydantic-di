@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ab_core.dependency.loaders.environment import LoaderEnvironment
+from pydantic_di.loaders.environment import LoaderEnvironment
 
 
 @pytest.mark.parametrize(

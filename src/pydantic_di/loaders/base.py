@@ -12,8 +12,8 @@ from generic_preserver.wrapper import generic_preserver
 from pydantic import BaseModel, Discriminator, TypeAdapter, model_validator
 from pydantic_core.core_schema import CoreSchema
 
-from ab_core.dependency.pydanticize import cached_type_adapter, pydanticize_data, pydanticize_type
-from ab_core.dependency.utils import extract_target_types, type_name_intersection
+from pydantic_di.pydanticize import cached_type_adapter, pydanticize_data, pydanticize_type
+from pydantic_di.utils import extract_target_types, type_name_intersection
 
 T = TypeVar("T")
 

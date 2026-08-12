@@ -6,11 +6,11 @@ import attrs
 import pytest
 from pydantic import BaseModel, Discriminator, Field
 
-from ab_core.dependency.depends import Depends, Load
-from ab_core.dependency.loaders.environment_object import (
+from pydantic_di.depends import Depends, Load
+from pydantic_di.loaders.environment_object import (
     ObjectLoaderEnvironment,
 )
-from ab_core.dependency.pydanticize import pydanticize_type
+from pydantic_di.pydanticize import pydanticize_type
 
 
 @pytest.fixture
