@@ -5,7 +5,7 @@ import os
 import re
 from collections.abc import Iterator
 from copy import deepcopy
-from typing import get_args
+from typing import TypeAliasType, get_args
 
 
 def str_intersection(*args: str) -> str:
@@ -116,21 +116,29 @@ def deep_merge(
     return merged
 
 
-def walk_types_args(t_base: type):
+def walk_types_args(t_base: object):
     """Yield a type and every nested argument type recursively."""
+    seen: set[int] = set()
 
     def walk(t):
+        identity = id(t)
+        if identity in seen:
+            return
+
+        seen.add(identity)
         yield t
 
-        t_args = get_args(t)
+        if isinstance(t, TypeAliasType):
+            yield from walk(t.__value__)
+            return
 
-        for t_arg in t_args:
+        for t_arg in get_args(t):
             yield from walk(t_arg)
 
     yield from walk(t_base)
 
 
-def extract_target_types(obj: type, target_type: type) -> Iterator[type | object]:
+def extract_target_types(obj: object, target_type: type) -> Iterator[type | object]:
     """Yield nested types that match or subclass `target_type`."""
     for t in walk_types_args(obj):
         if isinstance(t, target_type) or isinstance(t, type) and issubclass(t, target_type):

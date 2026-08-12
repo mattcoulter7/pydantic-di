@@ -77,6 +77,33 @@ def test_loader_single_type(env_overrides, expected_values, expected_instance):
         assert result == expected_instance
 
 
+def test_loader_supports_legacy_type_alias():
+    loader = ObjectLoaderEnvironment[LoaderUnion](
+        default_discriminator_value="A",
+    )
+
+    with patch.dict(os.environ, {}, clear=True):
+        result = loader.load()
+
+    assert result == DummyStoreA()
+
+
+def test_loader_supports_pep695_type_alias():
+    type RoleStore = Annotated[
+        DummyStoreA | DummyStoreB,
+        Discriminator("type"),
+    ]
+
+    loader = ObjectLoaderEnvironment[RoleStore](
+        default_discriminator_value="A",
+    )
+
+    with patch.dict(os.environ, {}, clear=True):
+        result = loader.load()
+
+    assert result == DummyStoreA()
+
+
 class Credentials(BaseModel):
     username: str
     password: str

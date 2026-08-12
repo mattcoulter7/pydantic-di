@@ -1,7 +1,9 @@
-import pytest
-from pydantic import BaseModel
+from typing import Annotated
 
-from pydantic_di.utils import deep_merge, to_env_prefix, type_name_intersection
+import pytest
+from pydantic import BaseModel, Discriminator
+
+from pydantic_di.utils import deep_merge, extract_target_types, to_env_prefix, type_name_intersection
 
 
 class DummyStoreA(BaseModel): ...
@@ -132,3 +134,29 @@ def test_deep_merge_non_dict_configured_replaces_dict_default():
     assert merged == {
         "service": "disabled",
     }
+
+
+def test_extract_target_types_unwraps_pep695_type_alias():
+    type RoleStore = Annotated[
+        DummyStoreA | DummyStoreB,
+        Discriminator("type"),
+    ]
+
+    models = list(extract_target_types(RoleStore, BaseModel))
+    discriminator = list(extract_target_types(RoleStore, Discriminator))
+
+    assert models == [DummyStoreA, DummyStoreB]
+    assert len(discriminator) == 1
+    assert discriminator[0].discriminator == "type"
+
+
+def test_extract_target_types_recursively_unwraps_pep695_aliases():
+    type RoleStoreModels = DummyStoreA | DummyStoreB
+    type RoleStore = Annotated[
+        RoleStoreModels,
+        Discriminator("type"),
+    ]
+
+    models = list(extract_target_types(RoleStore, BaseModel))
+
+    assert models == [DummyStoreA, DummyStoreB]
