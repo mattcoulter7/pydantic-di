@@ -3,8 +3,8 @@ from typing import Annotated
 import pytest
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, Load, inject
-from ab_core.dependency.singleton import SingletonRegistryMeta
+from pydantic_di import Depends, Load, inject
+from pydantic_di.singleton import SingletonRegistryMeta
 
 
 @pytest.fixture(autouse=True)

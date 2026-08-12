@@ -1,4 +1,4 @@
-"""Comprehensive test-suite for ab_core.dependency.Depends.
+"""Comprehensive test-suite for pydantic_di.Depends.
 
 New in this revision
 --------------------
@@ -14,7 +14,7 @@ from typing import Annotated, Any
 import pytest
 from pydantic import BaseModel
 
-from ab_core.dependency import Depends, inject, sentinel
+from pydantic_di import Depends, inject, sentinel
 
 # ------------------------------------------------------------------ #
 # Dummy dependencies                                                 #

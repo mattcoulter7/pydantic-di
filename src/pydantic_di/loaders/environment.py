@@ -3,7 +3,7 @@
 import os
 from typing import Any, Literal, override
 
-from ab_core.dependency.schema.loader_type import LoaderSource
+from pydantic_di.schema.loader_type import LoaderSource
 
 from .base import LoaderBase, T
 

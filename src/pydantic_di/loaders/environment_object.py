@@ -5,8 +5,8 @@ from typing import Any, Literal, override
 
 from pydantic import model_validator
 
-from ab_core.dependency.schema.loader_type import LoaderSource
-from ab_core.dependency.utils import extract_env_tree, to_env_prefix
+from pydantic_di.schema.loader_type import LoaderSource
+from pydantic_di.utils import extract_env_tree, to_env_prefix
 
 from .base import ObjectLoaderBase, T
 

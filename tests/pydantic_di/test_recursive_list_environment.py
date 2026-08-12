@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from pydantic import BaseModel, Discriminator, ValidationError
 
-from ab_core.dependency.depends import Load
+from pydantic_di.depends import Load
 
 
 class SimpleListObject(BaseModel):
