@@ -4,9 +4,20 @@ A lightweight dependency loading and injection package for Python.
 
 `ab-dependency` provides a small dependency system for loading objects from environment variables, Python callables, Pydantic models, attrs classes, and custom loaders. It is designed to feel familiar if you have used FastAPI dependencies, while also working outside FastAPI.
 
-## Disclaimer
+## Migration from auth-broker
 
-Whilst this package was originally built for the Open Source auth-broker package. It is published to PyPI and intended to be used for any python project, due to its high lvel of convenience.
+As of `pydantic-di` version `0.2.2`, this package has moved out of the
+`auth-broker` organisation, been renamed, and had its import namespace updated.
+
+| Item | Previous | Current |
+| --- | --- | --- |
+| GitHub repository | [`auth-broker/package-dependency`](https://github.com/auth-broker/package-dependency) | [`mattcoulter7/pydantic-di`](https://github.com/mattcoulter7/pydantic-di) |
+| PyPI package | [`ab-dependency`](https://pypi.org/project/ab-dependency/) | [`pydantic-di`](https://pypi.org/project/pydantic-di/) |
+| Install command | `pip install ab-dependency` | `pip install pydantic-di` |
+| Import namespace | `ab_core.dependency` | `pydantic_di` |
+
+The old PyPI package is retained as an archived historical package. New work
+should use `pydantic-di` and `pydantic_di`.
 
 ## Features
 
