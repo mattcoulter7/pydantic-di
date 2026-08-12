@@ -5,7 +5,7 @@ import os
 import re
 from collections.abc import Iterator
 from copy import deepcopy
-from typing import TypeAliasType, get_args
+from typing import TypeAliasType, get_args, get_origin
 
 
 def str_intersection(*args: str) -> str:
@@ -116,6 +116,18 @@ def deep_merge(
     return merged
 
 
+def get_type_alias(obj: object) -> TypeAliasType | None:
+    """Return the PEP 695 alias represented by an object, if any."""
+    if isinstance(obj, TypeAliasType):
+        return obj
+
+    origin = get_origin(obj)
+    if isinstance(origin, TypeAliasType):
+        return origin
+
+    return None
+
+
 def walk_types_args(t_base: object):
     """Yield a type and every nested argument type recursively."""
     seen: set[int] = set()
@@ -128,8 +140,14 @@ def walk_types_args(t_base: object):
         seen.add(identity)
         yield t
 
-        if isinstance(t, TypeAliasType):
-            yield from walk(t.__value__)
+        type_alias = get_type_alias(t)
+        if type_alias is not None:
+            yield from walk(type_alias.__value__)
+
+            if t is not type_alias:
+                for t_arg in get_args(t):
+                    yield from walk(t_arg)
+
             return
 
         for t_arg in get_args(t):

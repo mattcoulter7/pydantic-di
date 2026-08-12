@@ -10,7 +10,7 @@ from pydantic import BaseModel, Discriminator, Field, TypeAdapter, model_validat
 from pydantic_core.core_schema import CoreSchema
 
 from pydantic_di.pydanticize import cached_type_adapter, pydanticize_data, pydanticize_type
-from pydantic_di.utils import deep_merge, extract_target_types, type_name_intersection
+from pydantic_di.utils import deep_merge, extract_target_types, get_type_alias, type_name_intersection
 
 
 @generic_preserver
@@ -129,6 +129,10 @@ class ObjectLoaderBase[T](LoaderBase[T], ABC):
     @property
     def alias_name(self) -> str:
         """Generates an alias name for the loader based on the intersection of type names."""
+        type_alias = get_type_alias(self.type)
+        if type_alias is not None:
+            return type_alias.__name__
+
         assumed_name = type_name_intersection(self.types)
         if not assumed_name:
             raise ValueError(

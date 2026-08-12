@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated
 
 import pytest
@@ -40,6 +41,22 @@ class StartsWithZ(BaseModel): ...
 
 
 class EndsWithZ(BaseModel): ...
+
+
+class Permission(Enum):
+    ACCESS_READ = "access.read"
+
+
+class RoleName(Enum):
+    ADMIN = "admin"
+
+
+class YamlRoleStore[PermissionType: Enum, RoleNameType: Enum](BaseModel):
+    permission: PermissionType
+    role: RoleNameType
+
+
+class NullRoleStore[PermissionType: Enum, RoleNameType: Enum](BaseModel): ...
 
 
 @pytest.mark.parametrize(
@@ -160,3 +177,21 @@ def test_extract_target_types_recursively_unwraps_pep695_aliases():
     models = list(extract_target_types(RoleStore, BaseModel))
 
     assert models == [DummyStoreA, DummyStoreB]
+
+
+def test_extract_target_types_unwraps_parameterised_pep695_alias():
+    type RoleStore[PermissionType: Enum, RoleNameType: Enum] = Annotated[
+        YamlRoleStore[PermissionType, RoleNameType] | NullRoleStore[PermissionType, RoleNameType],
+        Discriminator("type"),
+    ]
+
+    target = RoleStore[Permission, RoleName]
+
+    models = list(extract_target_types(target, BaseModel))
+    discriminator = list(extract_target_types(target, Discriminator))
+
+    assert len(models) == 2
+    assert issubclass(models[0], YamlRoleStore)
+    assert issubclass(models[1], NullRoleStore)
+    assert len(discriminator) == 1
+    assert discriminator[0].discriminator == "type"
