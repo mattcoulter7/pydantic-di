@@ -21,3 +21,12 @@ def test_loader_environment(env_overrides, type_, key, expected_raw, expected_ca
     with patch.dict(os.environ, env_overrides, clear=False):
         result_casted = loader.load()
         assert result_casted == expected_casted
+
+
+def test_loader_environment_falsy_default_value():
+    loader = LoaderEnvironment[int](key="MISSING_KEY", default_value=0)
+
+    with patch.dict(os.environ, {}, clear=True):
+        result_casted = loader.load()
+
+    assert result_casted == 0

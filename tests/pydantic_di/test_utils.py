@@ -1,7 +1,7 @@
 import pytest
 from pydantic import BaseModel
 
-from pydantic_di.utils import to_env_prefix, type_name_intersection
+from pydantic_di.utils import deep_merge, to_env_prefix, type_name_intersection
 
 
 class DummyStoreA(BaseModel): ...
@@ -71,3 +71,64 @@ def test_type_name_intersection(types, expected_prefix):
 )
 def test_to_env_prefix(input_name, expected):
     assert to_env_prefix(input_name) == expected
+
+
+def test_deep_merge_configured_wins_recursively_and_inputs_unchanged():
+    defaults = {
+        "host": "localhost",
+        "port": 5432,
+        "credentials": {
+            "username": "admin",
+            "password": "secret",
+        },
+    }
+    configured = {
+        "port": "6432",
+        "credentials": {
+            "username": "matt",
+        },
+    }
+
+    merged = deep_merge(defaults, configured)
+
+    assert merged == {
+        "host": "localhost",
+        "port": "6432",
+        "credentials": {
+            "username": "matt",
+            "password": "secret",
+        },
+    }
+
+    # Ensure helper does not mutate either input.
+    assert defaults == {
+        "host": "localhost",
+        "port": 5432,
+        "credentials": {
+            "username": "admin",
+            "password": "secret",
+        },
+    }
+    assert configured == {
+        "port": "6432",
+        "credentials": {
+            "username": "matt",
+        },
+    }
+
+
+def test_deep_merge_non_dict_configured_replaces_dict_default():
+    merged = deep_merge(
+        {
+            "service": {
+                "host": "localhost",
+            },
+        },
+        {
+            "service": "disabled",
+        },
+    )
+
+    assert merged == {
+        "service": "disabled",
+    }

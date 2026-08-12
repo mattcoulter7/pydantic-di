@@ -9,11 +9,11 @@ from typing import (
 )
 
 from generic_preserver.wrapper import generic_preserver
-from pydantic import BaseModel, Discriminator, TypeAdapter, model_validator
+from pydantic import BaseModel, Discriminator, Field, TypeAdapter, model_validator
 from pydantic_core.core_schema import CoreSchema
 
 from pydantic_di.pydanticize import cached_type_adapter, pydanticize_data, pydanticize_type
-from pydantic_di.utils import extract_target_types, type_name_intersection
+from pydantic_di.utils import deep_merge, extract_target_types, type_name_intersection
 
 T = TypeVar("T")
 
@@ -37,6 +37,13 @@ class LoaderBase[T](BaseModel, ABC):
         """Load the raw data before any processing."""
         ...
 
+    def apply_defaults(
+        self,
+        data: Any,
+    ) -> Any:
+        """Apply loader-specific defaults to restructured data."""
+        return data
+
     def load(
         self,
     ) -> T:
@@ -45,9 +52,10 @@ class LoaderBase[T](BaseModel, ABC):
             data = self.load_raw()
         except Exception as e:
             raise RuntimeError(f"Error loading `{repr(self.type)}`: {e}") from e
-        if not data and self.default_value:
+        if not data and self.default_value is not None:
             return self.default_value
         data_restructured = pydanticize_data(deepcopy(data), self.core_schema)
+        data_restructured = self.apply_defaults(data_restructured)
         return self.type_adaptor.validate_python(data_restructured)
 
     @cached_property
@@ -83,8 +91,20 @@ class LoaderBase[T](BaseModel, ABC):
 class ObjectLoaderBase(LoaderBase[T], ABC):
     """Base class for loaders that handle Pydantic BaseModel objects."""
 
+    default_values: dict[str, Any] = Field(default_factory=dict)
+
     default_discriminator_value: Any = None
     discriminator_key: str | None = None
+
+    def apply_defaults(
+        self,
+        data: Any,
+    ) -> Any:
+        """Overlay configured values onto model-shaped defaults."""
+        if not self.default_values:
+            return data
+
+        return deep_merge(deepcopy(self.default_values), data)
 
     @model_validator(mode="after")
     def validate_type(self):

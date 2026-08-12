@@ -141,6 +141,89 @@ PORT=8080
 
 The value is validated and cast using Pydantic.
 
+## Loader defaults
+
+There are two default mechanisms with different semantics:
+
+- `default_value`: whole-result fallback when no source value is loaded.
+- `default_values`: object-field defaults for model loaders, merged with loaded values.
+
+### Whole-result fallback (`default_value`)
+
+Use this for scalar or single-value loaders.
+
+```python
+from pydantic_di.loaders import LoaderEnvironment
+
+port = LoaderEnvironment[int](
+    key="PORT",
+    default_value=8080,
+).load()
+```
+
+If `PORT` is missing, this returns `8080`.
+
+Falsy defaults are supported, including `0`, `False`, and empty strings.
+
+### Partial object defaults (`default_values`)
+
+Use this with object loaders to provide field-level defaults that are merged with loaded values.
+
+```python
+from pydantic import BaseModel
+from pydantic_di.loaders import ObjectLoaderEnvironment
+
+
+class Credentials(BaseModel):
+    username: str
+    password: str
+
+
+class ServiceConfig(BaseModel):
+    api_key: str
+    port: int
+    credentials: Credentials
+
+
+config = ObjectLoaderEnvironment[ServiceConfig](
+    env_prefix="MY_CONFIG",
+    default_values={
+        "api_key": "default",
+        "port": 5432,
+        "credentials": {
+            "username": "admin",
+            "password": "secret",
+        },
+    },
+).load()
+```
+
+With:
+
+```bash
+MY_CONFIG_PORT=6432
+MY_CONFIG_CREDENTIALS_USERNAME=matt
+```
+
+The effective data is:
+
+```python
+{
+    "api_key": "default",  # from default_values
+    "port": "6432",  # from env
+    "credentials": {
+        "username": "matt",  # from env
+        "password": "secret",  # from default_values
+    },
+}
+```
+
+Important notes:
+
+- `default_values` should be provided in model-field shape.
+- Environment values always override defaults for matching leaves.
+- Environment key flattening and field alignment are applied to loaded source data.
+
 ## Persistent dependencies
 
 `Load(..., persist=True)` caches the loaded dependency.

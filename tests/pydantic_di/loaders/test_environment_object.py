@@ -75,3 +75,72 @@ def test_loader_single_type(env_overrides, expected_values, expected_instance):
     with patch.dict(os.environ, env_overrides, clear=False):
         result = loader.load()
         assert result == expected_instance
+
+
+class Credentials(BaseModel):
+    username: str
+    password: str
+
+
+class ServiceConfig(BaseModel):
+    api_key: str
+    port: int
+    credentials: Credentials
+
+
+def test_loader_object_default_values_env_wins_after_alignment():
+    loader = ObjectLoaderEnvironment[ServiceConfig](
+        env_prefix="MY_CONFIG",
+        default_values={
+            "api_key": "default",
+            "port": 5432,
+            "credentials": {
+                "username": "admin",
+                "password": "secret",
+            },
+        },
+    )
+
+    env_overrides = {
+        "MY_CONFIG_API_KEY": "configured",
+        "MY_CONFIG_PORT": "6432",
+        "MY_CONFIG_CREDENTIALS_USERNAME": "matt",
+    }
+
+    with patch.dict(os.environ, env_overrides, clear=False):
+        result = loader.load()
+
+    assert result == ServiceConfig(
+        api_key="configured",
+        port=6432,
+        credentials=Credentials(
+            username="matt",
+            password="secret",
+        ),
+    )
+
+
+def test_loader_object_default_values_used_when_no_env_data():
+    loader = ObjectLoaderEnvironment[ServiceConfig](
+        env_prefix="MY_CONFIG",
+        default_values={
+            "api_key": "default",
+            "port": 5432,
+            "credentials": {
+                "username": "admin",
+                "password": "secret",
+            },
+        },
+    )
+
+    with patch.dict(os.environ, {}, clear=True):
+        result = loader.load()
+
+    assert result == ServiceConfig(
+        api_key="default",
+        port=5432,
+        credentials=Credentials(
+            username="admin",
+            password="secret",
+        ),
+    )
