@@ -5,10 +5,10 @@ from typing import Any, Literal, override
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import LoaderBase, T
+from .base import LoaderBase
 
 
-class LoaderEnvironment(LoaderBase[T]):
+class LoaderEnvironment[T](LoaderBase[T]):
     """Load a value directly from an environment variable.
 
     The configured key is read verbatim and then parsed by Pydantic

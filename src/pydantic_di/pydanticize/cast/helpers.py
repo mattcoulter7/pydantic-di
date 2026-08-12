@@ -3,17 +3,13 @@
 import inspect
 from collections.abc import Callable
 from functools import cache
-from typing import ParamSpec, TypeVar, cast
+from typing import cast
 
 from pydantic import TypeAdapter
 
 from .adaptors.attrs import HAS_ATTRS, AttrsPlugin
 from .adaptors.base import BaseTypePlugin
 from .adaptors.unset import UnsetStripPlugin
-
-# ---------- typed cache wrapper ----------
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 def typed_cache[**P, R](func: Callable[P, R]) -> Callable[P, R]:

@@ -5,11 +5,10 @@ from typing import Any, Literal, override
 
 from pydantic_di.schema.loader_type import LoaderSource
 
-from .base import T
 from .file_object import ObjectLoaderFileBase
 
 
-class ObjectLoaderIni(ObjectLoaderFileBase[T]):
+class ObjectLoaderIni[T](ObjectLoaderFileBase[T]):
     """Load a structured object from a local INI file."""
 
     source: Literal[LoaderSource.INI_OBJECT] = LoaderSource.INI_OBJECT

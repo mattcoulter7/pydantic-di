@@ -4,10 +4,10 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import Any, override
 
-from .base import ObjectLoaderBase, T
+from .base import ObjectLoaderBase
 
 
-class ObjectLoaderFileBase(ObjectLoaderBase[T]):
+class ObjectLoaderFileBase[T](ObjectLoaderBase[T]):
     """Base loader for structured configuration stored in a local file."""
 
     path: Path
