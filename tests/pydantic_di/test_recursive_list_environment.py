@@ -12,6 +12,10 @@ class SimpleListObject(BaseModel):
     list_field: list[str]
 
 
+class StringOrListObject(BaseModel):
+    value: str | list[str] | None = None
+
+
 class BlahItem(BaseModel):
     type: Literal["blah"] = "blah"
     label: str
@@ -182,6 +186,52 @@ def test_empty_json_list_still_supported():
         result = Load(SimpleListObject, persist=False)
 
     assert result == SimpleListObject(list_field=[])
+
+
+def test_complex_union_list_parses_json_list_value():
+    with patch.dict(
+        os.environ,
+        {
+            "STRING_OR_LIST_OBJECT_VALUE": '["a"]',
+        },
+        clear=False,
+    ):
+        result = Load(StringOrListObject, persist=False)
+
+    assert result == StringOrListObject(value=["a"])
+
+
+def test_complex_union_preserves_plain_string_when_json_parse_fails():
+    with patch.dict(
+        os.environ,
+        {
+            "STRING_OR_LIST_OBJECT_VALUE": "a",
+        },
+        clear=False,
+    ):
+        result = Load(StringOrListObject, persist=False)
+
+    assert result == StringOrListObject(value="a")
+
+
+def test_complex_union_uses_default_none_when_env_value_missing():
+    with patch.dict(os.environ, {}, clear=True):
+        result = Load(StringOrListObject, persist=False)
+
+    assert result == StringOrListObject(value=None)
+
+
+def test_complex_union_list_supports_indexed_env_form():
+    with patch.dict(
+        os.environ,
+        {
+            "STRING_OR_LIST_OBJECT_VALUE_0": "a",
+        },
+        clear=False,
+    ):
+        result = Load(StringOrListObject, persist=False)
+
+    assert result == StringOrListObject(value=["a"])
 
 
 def test_environment_object_preserves_falsy_values():
