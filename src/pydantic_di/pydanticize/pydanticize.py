@@ -176,6 +176,103 @@ def pydanticize_list(
     ]
 
 
+def _resolve_schema(
+    schema: CoreSchema,
+    *,
+    definition_map: dict | None = None,
+) -> CoreSchema:
+    """Unwrap schema wrappers that do not affect input shape."""
+    while True:
+        schema_type = schema.get("type")
+        if schema_type == "definition-ref":
+            schema = definition_map[schema["schema_ref"]]
+            continue
+        if schema_type in {"default", "nullable"} and "schema" in schema:
+            schema = schema["schema"]
+            continue
+        return schema
+
+
+def _schema_is_complex(
+    schema: CoreSchema,
+    *,
+    definition_map: dict | None = None,
+) -> bool:
+    """Return whether a schema represents JSON-decodable structured data."""
+    schema = _resolve_schema(schema, definition_map=definition_map)
+    schema_type = schema.get("type")
+
+    if schema_type == "union":
+        return any(_schema_is_complex(choice, definition_map=definition_map) for choice in schema["choices"])
+
+    return schema_type in {
+        "definitions",
+        "dict",
+        "list",
+        "model",
+        "model-fields",
+        "tagged-union",
+        "typed-dict",
+    }
+
+
+def _is_indexed_list_dict(obj: dict[str, Any]) -> bool:
+    """Return whether a dict uses the loader's indexed-list convention."""
+    return bool(obj) and all(key.isdigit() for key in obj)
+
+
+def _union_choice_matches_value(
+    obj: Any,
+    schema: CoreSchema,
+    *,
+    definition_map: dict | None = None,
+) -> bool:
+    """Return whether an input shape should be transformed with a union choice."""
+    schema = _resolve_schema(schema, definition_map=definition_map)
+    schema_type = schema.get("type")
+
+    if isinstance(obj, list):
+        return schema_type == "list"
+
+    if isinstance(obj, dict):
+        if schema_type == "list":
+            return _is_indexed_list_dict(obj)
+        return schema_type in {"definitions", "dict", "model", "model-fields", "tagged-union", "typed-dict"}
+
+    return False
+
+
+def pydanticize_union(
+    obj: list[Any] | dict[str, Any] | str | Any,
+    schema: CoreSchema,
+    *,
+    definition_map: dict | None = None,
+) -> Any:
+    """Transform complex union values before Pydantic selects a branch."""
+    choices = schema["choices"]
+
+    if isinstance(obj, str) and any(_schema_is_complex(choice, definition_map=definition_map) for choice in choices):
+        try:
+            obj = json.loads(obj)
+        except ValueError:
+            return obj
+
+    for choice in choices:
+        if not _union_choice_matches_value(obj, choice, definition_map=definition_map):
+            continue
+
+        try:
+            return pydanticize_data(
+                obj,
+                choice,
+                definition_map=definition_map,
+            )
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    return obj
+
+
 def pydanticize_tagged_union(
     obj: dict[str, Any],
     schema: CoreSchema,
@@ -298,6 +395,12 @@ def pydanticize_data(
             )
         if type == "tagged-union":
             return pydanticize_tagged_union(
+                obj,
+                core_schema,
+                definition_map=definition_map,
+            )
+        if type == "union":
+            return pydanticize_union(
                 obj,
                 core_schema,
                 definition_map=definition_map,
